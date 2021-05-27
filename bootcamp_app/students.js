@@ -4,15 +4,21 @@ const pool = new Pool({
   user: 'vagrant',
   password: '123',
   host: 'localhost',
-  database: 'bootcampx'
+  database: 'vagrant'
 });
 
+const cohortIn = process.argv.slice(2)[0];
+const cohortLim = process.argv.slice(2)[1];
+
 pool.query(`
-SELECT id, name, cohort_id
+SELECT students.id as student_id, students.name as name, cohorts.name as cohort
 FROM students
-LIMIT 5;
+JOIN cohorts ON cohorts.id = cohort_id
+WHERE cohorts.name LIKE '%${cohortIn}%'
+LIMIT ${cohortLim};
 `)
 .then(res => {
-  console.log(res);
-})
-.catch(err => console.error('query error', err.stack));
+  res.rows.forEach(user => {
+    console.log(`${user.name} has an id of ${user.student_id} and was in the ${user.cohort} cohort`);
+  })
+});
